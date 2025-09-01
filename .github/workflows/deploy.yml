@@ -1,0 +1,29 @@
+name: Ansible Deploy
+
+on:
+  workflow_dispatch:  #  manuel
+  repository_dispatch:  # API
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H X.X.X.X >> ~/.ssh/known_hosts
+          ssh-keyscan -H Y.Y.Y.Y >> ~/.ssh/known_hosts
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i inventory.ini setup.yml \
+            -u ${{ secrets.SSH_USER }} \
+            --private-key ~/.ssh/id_rsa
