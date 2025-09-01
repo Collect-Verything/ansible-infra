@@ -29,7 +29,7 @@ Lorsqu’un serveur est ajouté, Ansible applique les actions suivantes :
 
 ## 🔄 Workflow général
 
-### Étapes
+### Étapes Ansible
 1. **Ajout d’un serveur** :  
    - via une requête API au microservice (`/add-server`)  
    - ou depuis une base de données contenant IP + mot de passe root.  
@@ -46,6 +46,52 @@ Lorsqu’un serveur est ajouté, Ansible applique les actions suivantes :
    - seul l’utilisateur `canse` peut se connecter  
    - root login est désactivé  
    - serveur sécurisé et prêt pour la production  
+
+
+Parfait 👍 tu veux l’équivalent d’une section **Étapes Ansible**, mais cette fois pour ton **service** (le microservice + le futur frontend). Voici une version structurée que tu pourras coller directement dans ton README :
+
+---
+
+### Étapes Service
+
+1. **Réception du fichier CSV**
+
+    * via un **contrôleur API** du microservice (`/upload-csv`)
+    * le fichier contient les adresses IP et les mots de passe root initiaux.
+
+2. **Traitement et stockage**
+
+    * le service lit le CSV,
+    * crée automatiquement une **nouvelle table** dans la base de données (correspondant à une *range* de serveurs à configurer),
+    * enregistre chaque serveur avec ses informations (IP, mot de passe root, état de configuration).
+
+3. **Préparation Ansible**
+
+    * le service écrit ou met à jour le fichier `inventory.ini` avec les nouveaux serveurs,
+    * déclenche l’exécution du playbook `setup.yml`.
+
+4. **Exécution Ansible**
+
+    * Ansible applique la configuration et sécurise chaque serveur de la range,
+    * installe les services (UFW, Fail2ban, Docker, etc.),
+    * crée l’utilisateur `canse` avec clé SSH et nouveau mot de passe.
+
+---
+
+### Étapes Front
+
+
+1**Consultation (Frontend)**
+
+    * une interface permet de consulter toutes les **tables de ranges de serveurs** créées,
+    * pour chaque serveur :
+
+        * IP
+        * mot de passe initial root
+        * nouveau mot de passe `canse`
+        * état de configuration (en attente, en cours, terminé).
+        * selectionner un nouveau fichier csv pour une nouvelle range de server a configurer
+
 
 ---
 
